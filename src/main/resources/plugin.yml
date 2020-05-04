@@ -1,0 +1,23 @@
+name: ComplexOres
+version: ${project.version}
+main: com.miketheshadow.complexores.ComplexOres
+api-version: 1.13
+authors: [MikeTheShadow]
+description: Adds ore mining to minecraft
+depend: [ComplexProficiencies]
+commands:
+  material:
+    description: Shows material of item in hand
+    usage: /<material>
+    permission: ComplexOres.basic
+    permission-message: You don't have ComplexOres.basic permission
+  oreRegister:
+    description: Registers an ore for complex proficiencies
+    usage: /<oreRegister> [respawnTime] [laborCost] [levelReq] [%chance1] [%chance2] ...
+    permission: ComplexOres.admin
+    permission-message: You don't have ComplexOres.admin permission
+  oreRegen:
+    description: Restores all ores
+    usage: /<oreRegen>
+    permission: ComplexOres.admin
+    permission-message: You don't have ComplexOres.admin permission
