@@ -21,3 +21,8 @@ commands:
     usage: /<oreRegen>
     permission: ComplexOres.admin
     permission-message: You don't have ComplexOres.admin permission
+  setreferenceore:
+    description: Creates a ref ore
+    usage: /<setreferenceore>
+    permission: ComplexOres.admin
+    permission-message: You don't have ComplexOres.admin permission

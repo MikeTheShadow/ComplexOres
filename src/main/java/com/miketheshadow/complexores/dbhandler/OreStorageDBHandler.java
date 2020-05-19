@@ -25,8 +25,6 @@ public class OreStorageDBHandler {
         FindIterable<Document> cursor = collection.find(new BasicDBObject("location", location.serialize()));
         if (cursor.first() == null) {
             collection.insertOne(document);
-            ConsoleCommandSender sender = Bukkit.getConsoleSender();
-            sender.sendMessage(ChatColor.GREEN + "Debug: " + "adding ore at location" + location.toString());
             return true;
         }
         return false;
@@ -55,15 +53,15 @@ public class OreStorageDBHandler {
     }
 
     public static void restoreAllBlocks() {
+        Bukkit.broadcastMessage(ChatColor.GREEN + "Debug: " + "Restoring all ores...");
         for(Document document : collection.find()) {
-            Material material = Material.valueOf(document.getString("material"));
+            Material material = Material.getMaterial(document.getString("material"));
+            if(OreReferenceDBHandler.getReferenceOre(material.toString()) != null) {
+                material = OreReferenceDBHandler.getReferenceOre(material.toString()).getBlock().getType();
+            }
             BasicDBObject dropObject = new BasicDBObject((Document)document.get("location"));
             Location location = Location.deserialize( (HashMap<String, Object>) dropObject.toMap());
             location.getBlock().setType(material);
         }
-    }
-
-    public static void updateDocument(Document document) {
-
     }
 }

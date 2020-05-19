@@ -2,17 +2,18 @@ package com.miketheshadow.complexores.listener;
 
 import com.miketheshadow.complexores.ComplexOres;
 import com.miketheshadow.complexores.dbhandler.OreDBHandler;
+import com.miketheshadow.complexores.dbhandler.OreReferenceDBHandler;
 import com.miketheshadow.complexores.dbhandler.OreStorageDBHandler;
 import com.miketheshadow.complexores.util.CustomOre;
 import com.miketheshadow.complexproficiencies.api.ProficiencyAPI;
 import com.miketheshadow.complexproficiencies.api.UserAPI;
 import com.miketheshadow.complexproficiencies.utils.CustomUser;
+import com.mongodb.BasicDBObject;
 import de.tr7zw.nbtapi.NBTContainer;
 import de.tr7zw.nbtapi.NBTItem;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bson.Document;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,10 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class PlayerBreakBlockEvent implements Listener {
 
@@ -31,18 +29,28 @@ public class PlayerBreakBlockEvent implements Listener {
     public void onBlockBreakEvent(final BlockBreakEvent event) {
         Player player = event.getPlayer();
         final CustomOre ore = OreDBHandler.getOre(event.getBlock().getType().toString());
-        if(ore == null) return;
+        if(ore == null) {
+            return;
+        }
         event.setCancelled(true);
         if(player.getGameMode() == GameMode.CREATIVE) {
-            boolean isRemoved = OreStorageDBHandler.removeOre(event.getBlock().getLocation());
-            if(!isRemoved)player.sendMessage(ChatColor.RED + "Ore was not in DB!");
-            else player.sendMessage(ChatColor.RED + "Ore removed from DB!");
+            if(OreReferenceDBHandler.removeReferenceOre(event.getBlock().getLocation())) {
+                player.sendMessage(ChatColor.RED + "YOU REMOVED A REFERENCE ORE OF TYPE: " + event.getBlock().getType() +" THIS WAS A MISTAKE PLEASE REPLACE IT AND SET IT AS SUCH!");
+            } else if(OreStorageDBHandler.removeOre(event.getBlock().getLocation())) {
+                player.sendMessage(ChatColor.RED + "Ore removed from DB!");
+            }
+            else player.sendMessage(ChatColor.RED + "Ore was not in DB!");
             event.setCancelled(false);
             return;
         }
         if(!OreStorageDBHandler.getOreFromLocation(event.getBlock().getLocation())) {
             player.sendMessage(ChatColor.RED + "ORE EXCEPTION! THIS ORE IS INVALID! PLEASE REPORT IT WITH A SCREENSHOT OF THE TEXT BELOW!");
             player.sendMessage(ChatColor.RED + event.getBlock().getLocation().toString());
+            return;
+        }
+        if(OreReferenceDBHandler.removeReferenceOre(event.getBlock().getLocation())) {
+            player.sendMessage(ChatColor.RED + "REMOVED A REFERENCE ORE PLEASE NOTE THAT A REFERENCE ORE IS ESSENTIAL FOR THE ORE PLUGIN TO WORK!!!");
+            player.sendMessage(ChatColor.RED + "THE BLOCK WAS OF TYPE: " + event.getBlock().getType() + " REPLACE IT AND RUN THE setreferenceore ON IT TO RESTORE");
             return;
         }
         int level = ProficiencyAPI.getProfLevel(player,"mining");
@@ -92,7 +100,15 @@ public class PlayerBreakBlockEvent implements Listener {
         Bukkit.getScheduler().scheduleSyncDelayedTask(ComplexOres.getPlugin(ComplexOres.class),new Runnable() {
             @Override
             public void run() {
-                event.getBlock().setType(Material.valueOf(ore.getMaterial()));
+                String mat = ore.getMaterial();
+                Material material;
+                if(OreReferenceDBHandler.getReferenceOre(mat) != null) {
+                    material = OreReferenceDBHandler.getReferenceOre(mat).getBlock().getType();
+                } else {
+                    material = Material.valueOf(ore.getMaterial());
+                }
+                event.getBlock().setType(material);
+
             }
         },time);
 

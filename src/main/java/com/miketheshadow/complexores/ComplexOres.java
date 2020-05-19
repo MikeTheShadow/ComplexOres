@@ -1,21 +1,21 @@
 package com.miketheshadow.complexores;
 
 import com.miketheshadow.complexores.dbhandler.OreDBHandler;
+import com.miketheshadow.complexores.dbhandler.OreReferenceDBHandler;
 import com.miketheshadow.complexores.dbhandler.OreStorageDBHandler;
 import com.miketheshadow.complexores.listener.PlayerBreakBlockEvent;
 import com.miketheshadow.complexores.listener.PlayerPlaceBlockEvent;
 import com.miketheshadow.complexores.util.CustomOre;
 import de.tr7zw.nbtapi.NBTCompound;
-import de.tr7zw.nbtapi.NBTContainer;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -26,11 +26,11 @@ public class ComplexOres extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "Loaded Complex Ores!");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "Loading Complex Ores!");
         PluginManager manager = Bukkit.getPluginManager();
         manager.registerEvents(new PlayerBreakBlockEvent(),this);
         manager.registerEvents(new PlayerPlaceBlockEvent(),this);
-        OreStorageDBHandler.restoreAllBlocks();
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "Loaded ores!");
     }
 
     @Override
@@ -45,11 +45,22 @@ public class ComplexOres extends JavaPlugin {
             if(sender instanceof Player) {
                 Player player = (Player)sender;
                 player.sendMessage(ChatColor.GOLD + "MaterialID: " + player.getInventory().getItemInMainHand().getType());
-                NBTItem nbtItem = new NBTItem(player.getInventory().getItemInMainHand());
-                player.sendMessage(ChatColor.GOLD + "NBT Type:" + NBTItem.convertNBTtoItem(nbtItem).getType());
+                NBTCompound nbtItem = NBTItem.convertItemtoNBT(player.getInventory().getItemInMainHand());
+                player.sendMessage(ChatColor.GOLD + "NBT Type:" + NBTItem.convertNBTtoItem(nbtItem).toString());
                 return true;
             }
             return false;
+        }
+        if(cmd.getName().equalsIgnoreCase("setreferenceore")) {
+            if(!instanceOfPlayer(sender))return false;
+            Player player = (Player)sender;
+            Block block = player.getTargetBlock(null,5);
+            String  material = block.getType().toString();
+            sender.sendMessage(material);
+            OreReferenceDBHandler.addReferenceOre(material,block.getLocation());
+            OreStorageDBHandler.removeOre(block.getLocation());
+            sender.sendMessage(ChatColor.GREEN + "Added reference ore for: " + block.getType().toString());
+            return true;
         }
         if(cmd.getName().equalsIgnoreCase("OreRegister")) {
             if(sender instanceof Player) {
@@ -82,4 +93,6 @@ public class ComplexOres extends JavaPlugin {
         }
         return false;
     }
+
+    public boolean instanceOfPlayer(CommandSender sender) {return (sender instanceof Player);}
 }
