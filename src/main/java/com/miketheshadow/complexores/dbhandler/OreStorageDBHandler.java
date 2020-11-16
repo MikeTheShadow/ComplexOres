@@ -1,5 +1,6 @@
 package com.miketheshadow.complexores.dbhandler;
 
+import com.miketheshadow.complexproficiencies.api.DatabaseAPI;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -11,23 +12,23 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.command.ConsoleCommandSender;
 
 import java.util.HashMap;
 
 public class OreStorageDBHandler {
 
     private static MongoCollection<Document> collection = init();
-    public static boolean addOre(String material, Location location) {
+    public static void addOre(String material, Location location) {
         Document document = new Document();
         document.append("location",location.serialize());
         document.append("material",material);
         FindIterable<Document> cursor = collection.find(new BasicDBObject("location", location.serialize()));
-        if (cursor.first() == null) {
+        Document cursorDoc = cursor.first();
+        if (cursorDoc == null) {
             collection.insertOne(document);
-            return true;
+        } else {
+            collection.replaceOne(cursorDoc,document);
         }
-        return false;
     }
     public static boolean getOreFromLocation(Location location) {
         FindIterable<Document> cursor = collection.find(new BasicDBObject("location", location.serialize()));
@@ -45,7 +46,7 @@ public class OreStorageDBHandler {
     public static MongoCollection<Document> init() {
         if(collection == null)
         {
-            MongoClient mongoClient = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+            MongoClient mongoClient = new MongoClient(new MongoClientURI(DatabaseAPI.getDatabaseConnection().getConnectionString()));
             MongoDatabase database = mongoClient.getDatabase("ComplexOres");
             return database.getCollection("OreStorage");
         }

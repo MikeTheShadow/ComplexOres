@@ -80,7 +80,7 @@ public class ComplexOres extends JavaPlugin {
                     player.sendMessage(ChatColor.GREEN + "Chance drop: " + inventory.getItem(i - 1).getType().toString() + " with chance: " + args[i]);
                 }
                 CustomOre customOre = new CustomOre(ore.toString(),guaranteedItem,map,respawnTime,laborCost,levelReq);
-                OreDBHandler.addOre(customOre);
+                if(!OreDBHandler.addOre(customOre)) OreDBHandler.updateOre(customOre);
                 return true;
             }
             return false;

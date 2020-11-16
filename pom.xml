@@ -61,7 +61,7 @@
         <dependency>
             <groupId>com.github.MikeTheShadow</groupId>
             <artifactId>ComplexProficiencies</artifactId>
-            <version>V2.2.1</version>
+            <version>3.1.1</version>
         </dependency>
     </dependencies>
 

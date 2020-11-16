@@ -1,15 +1,13 @@
 package com.miketheshadow.complexores.dbhandler;
 
 import com.miketheshadow.complexores.util.CustomOre;
-import com.miketheshadow.complexproficiencies.crafting.Category;
-import com.miketheshadow.complexproficiencies.utils.CustomUser;
+import com.miketheshadow.complexproficiencies.api.DatabaseAPI;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtapi.NBTContainer;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bson.Document;
@@ -22,6 +20,7 @@ import java.util.List;
 public class OreDBHandler {
 
     private static  MongoCollection<Document> collection = init();
+
     public static boolean addOre(CustomOre customOre) {
         FindIterable<Document> cursor = collection.find(new BasicDBObject("material", customOre.getMaterial()));
         if (cursor.first() == null) {
@@ -33,19 +32,20 @@ public class OreDBHandler {
         }
         return false;
     }
-    public static CustomOre getOre(String material){
+
+    public static CustomOre getOre(String material) {
         FindIterable<Document> cursor = collection.find(new BasicDBObject("material", material));
         if(cursor.first() == null) return null;
         return new CustomOre(cursor.first());
     }
+
     public static void updateOre(CustomOre customOre) {
         collection.replaceOne(new BasicDBObject("material", customOre), customOre.toDocument());
     }
 
     public static MongoCollection<Document> init() {
-        if(collection == null)
-        {
-            MongoClient mongoClient = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+        if(collection == null) {
+            MongoClient mongoClient = new MongoClient(new MongoClientURI(DatabaseAPI.getDatabaseConnection().getConnectionString()));
             MongoDatabase database = mongoClient.getDatabase("ComplexOres");
             return database.getCollection("Ores");
         }
@@ -57,6 +57,5 @@ public class OreDBHandler {
     }
 
     public static void updateDocument(Document document) {
-
     }
 }

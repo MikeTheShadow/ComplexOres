@@ -1,5 +1,6 @@
 package com.miketheshadow.complexores.dbhandler;
 
+import com.miketheshadow.complexproficiencies.api.DatabaseAPI;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -59,7 +60,7 @@ public class OreReferenceDBHandler {
     public static MongoCollection<Document> init() {
         if(collection == null)
         {
-            MongoClient mongoClient = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+            MongoClient mongoClient = new MongoClient(new MongoClientURI(DatabaseAPI.getDatabaseConnection().getConnectionString()));
             MongoDatabase database = mongoClient.getDatabase("ComplexOres");
             return database.getCollection("OreReferences");
         }
