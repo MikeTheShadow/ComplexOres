@@ -19,7 +19,7 @@ import java.util.List;
 
 public class OreDBHandler {
 
-    private static  MongoCollection<Document> collection = init();
+    private static final MongoCollection<Document> collection = init();
 
     public static boolean addOre(CustomOre customOre) {
         FindIterable<Document> cursor = collection.find(new BasicDBObject("material", customOre.getMaterial()));
